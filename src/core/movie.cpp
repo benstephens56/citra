@@ -228,7 +228,7 @@ u64 Movie::GetCurrentInputIndex() const {
     return nearbyint(current_input * FRAME_CONVERT_CONST);
 }
 u64 Movie::GetTotalInputCount() const {
-    return nearbyint(total_input * FRAME_CONVERT);
+    return nearbyint(total_input * FRAME_CONVERT_CONST);
 }
 
 void Movie::CheckInputEnd() {
