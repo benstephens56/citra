@@ -221,14 +221,11 @@ Movie::PlayMode Movie::GetPlayMode() const {
     return play_mode;
 }
 
-//The coefficient below converts input count to frame count
-constexpr double FRAME_CONVERT_CONST = 0.255689103308912;
-
 u64 Movie::GetCurrentInputIndex() const {
-    return nearbyint(current_input * FRAME_CONVERT_CONST);
+    return nearbyint(current_input / 234.0 * GPU::SCREEN_REFRESH_RATE);
 }
 u64 Movie::GetTotalInputCount() const {
-    return nearbyint(total_input * FRAME_CONVERT_CONST);
+    return nearbyint(total_input / 234.0 * GPU::SCREEN_REFRESH_RATE);
 }
 
 void Movie::CheckInputEnd() {
