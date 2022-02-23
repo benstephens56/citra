@@ -22,6 +22,7 @@
 #include "core/hle/service/hid/hid.h"
 #include "core/hle/service/ir/extra_hid.h"
 #include "core/hle/service/ir/ir_rst.h"
+#include "core/hw/gpu.h"
 #include "core/movie.h"
 
 namespace Core {
