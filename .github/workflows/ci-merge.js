@@ -6,19 +6,30 @@ const fs = require("fs");
 const DETECTION_TIME_FRAME = (parseInt(process.env.DETECTION_TIME_FRAME)) || (24 * 3600 * 1000);
 
 async function checkBaseChanges(github, context) {
-    // a special robustness handling for when GHA did not pass the repository info
-    if (!context.payload.repository) {
-        const result = await github.rest.repos.get({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-        });
-        context.payload.repository = result.data;
-    }
-    const delta = new Date() - new Date(context.payload.repository.pushed_at);
+    // query the commit date of the latest commit on this branch
+    const query = `query($owner:String!, $name:String!, $ref:String!) {
+        repository(name:$name, owner:$owner) {
+            ref(qualifiedName:$ref) {
+                target {
+                    ... on Commit { id committedDate oid }
+                }
+            }
+        }
+    }`;
+    const variables = {
+        owner: context.repo.owner,
+        name: context.repo.repo,
+        ref: 'refs/heads/master',
+    };
+    const result = await github.graphql(query, variables);
+    const committedAt = result.repository.ref.target.committedDate;
+    console.log(`Last commit committed at ${committedAt}.`);
+    const delta = new Date() - new Date(committedAt);
     if (delta <= DETECTION_TIME_FRAME) {
         console.info('New changes detected, triggering a new build.');
         return true;
     }
+    console.info('No new changes detected.');
     return false;
 }
 
