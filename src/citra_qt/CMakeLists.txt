@@ -302,6 +302,11 @@ create_target_directory_groups(citra-qt)
 target_link_libraries(citra-qt PRIVATE audio_core citra_common citra_core input_common network video_core)
 target_link_libraries(citra-qt PRIVATE Boost::boost glad nihstro-headers Qt6::Widgets Qt6::Multimedia Qt6::Concurrent)
 target_link_libraries(citra-qt PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads vulkan-headers)
+# Qt6::Multimedia can transitively pull in a system-installed Vulkan SDK's headers (e.g. via a
+# Vulkan-enabled multimedia backend). If that SDK's vulkan.hpp is newer than the vulkan-headers
+# submodule this project builds against, the two versions disagree on the mangled name of
+# vk::defaultDispatchLoaderDynamic and the final link fails. Force our bundled copy to win.
+target_include_directories(citra-qt BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/externals/vulkan-headers/include")
 
 if (NOT WIN32)
     target_include_directories(citra-qt PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})

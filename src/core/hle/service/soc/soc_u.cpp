@@ -1868,7 +1868,7 @@ std::optional<SOC_U::InterfaceInfo> SOC_U::GetDefaultInterfaceInfo() {
     socklen_t s_info_len = sizeof(struct sockaddr_in);
     sockaddr_in s_info;
 
-    if ((sock_fd = ::socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    if ((sock_fd = ::socket(AF_INET, SOCK_STREAM, 0)) == static_cast<decltype(sock_fd)>(-1)) {
         return std::nullopt;
     }
 
@@ -1886,7 +1886,7 @@ std::optional<SOC_U::InterfaceInfo> SOC_U::GetDefaultInterfaceInfo() {
 
 #ifdef _WIN32
     sock_fd = WSASocket(AF_INET, SOCK_DGRAM, 0, 0, 0, 0);
-    if (sock_fd == SOCKET_ERROR) {
+    if (sock_fd == static_cast<decltype(sock_fd)>(SOCKET_ERROR)) {
         return std::nullopt;
     }
 
