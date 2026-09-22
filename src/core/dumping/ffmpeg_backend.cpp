@@ -491,16 +491,20 @@ bool FFmpegAudioStream::Init(FFmpegMuxer& muxer) {
     // Configure audio codec context
     codec_context->codec_type = AVMEDIA_TYPE_AUDIO;
     codec_context->bit_rate = Settings::values.audio_bitrate;
-    if (codec->sample_fmts) {
-        codec_context->sample_fmt = codec->sample_fmts[0];
+    FFMPEG_IGNORE_DEPRECATED_BEGIN
+    const AVSampleFormat* const codec_sample_fmts = codec->sample_fmts;
+    const int* const codec_supported_samplerates = codec->supported_samplerates;
+    FFMPEG_IGNORE_DEPRECATED_END
+    if (codec_sample_fmts) {
+        codec_context->sample_fmt = codec_sample_fmts[0];
     } else {
         codec_context->sample_fmt = AV_SAMPLE_FMT_S16P;
     }
 
-    if (codec->supported_samplerates) {
-        codec_context->sample_rate = codec->supported_samplerates[0];
+    if (codec_supported_samplerates) {
+        codec_context->sample_rate = codec_supported_samplerates[0];
         // Prefer native sample rate if supported
-        const int* ptr = codec->supported_samplerates;
+        const int* ptr = codec_supported_samplerates;
         while ((*ptr)) {
             if ((*ptr) == AudioCore::native_sample_rate) {
                 codec_context->sample_rate = AudioCore::native_sample_rate;
