@@ -187,6 +187,18 @@ public:
         state.buttons[button] = value;
     }
 
+    /// Like SetButton(), but only seeds a default if this button has no cached state yet, rather
+    /// than unconditionally overwriting it. Device factories call this just so a subsequent
+    /// GetButton() for a button/axis/hat index that's never been touched doesn't throw (an
+    /// out-of-range std::unordered_map::at()); it must not clobber an already-tracked button that
+    /// happens to be held at the moment a device wrapper is (re-)created -- e.g. when a savestate
+    /// load recreates the HID module's input devices -- or the held input reads as released until
+    /// the physical button is released and pressed again to generate a fresh SDL event.
+    void EnsureButton(int button) {
+        std::lock_guard lock{mutex};
+        state.buttons.try_emplace(button, false);
+    }
+
     bool GetButton(int button) const {
         std::lock_guard lock{mutex};
         return state.buttons.at(button);
@@ -195,6 +207,12 @@ public:
     void SetAxis(int axis, Sint16 value) {
         std::lock_guard lock{mutex};
         state.axes[axis] = value;
+    }
+
+    /// See EnsureButton() -- same idea, for axes.
+    void EnsureAxis(int axis) {
+        std::lock_guard lock{mutex};
+        state.axes.try_emplace(axis, 0);
     }
 
     float GetAxis(int axis) const {
@@ -222,6 +240,12 @@ public:
     void SetHat(int hat, Uint8 direction) {
         std::lock_guard lock{mutex};
         state.hats[hat] = direction;
+    }
+
+    /// See EnsureButton() -- same idea, for hats.
+    void EnsureHat(int hat) {
+        std::lock_guard lock{mutex};
+        state.hats.try_emplace(hat, SDL_HAT_CENTERED);
     }
 
     bool GetHatDirection(int hat, Uint8 direction) const {
@@ -731,8 +755,9 @@ public:
             } else {
                 direction = 0;
             }
-            // This is necessary so accessing GetHat with hat won't crash
-            joystick->SetHat(hat, SDL_HAT_CENTERED);
+            // This is necessary so accessing GetHat with hat won't crash. Must not disturb an
+            // already-tracked hat's real position (see EnsureHat()'s doc comment).
+            joystick->EnsureHat(hat);
             return std::make_unique<SDLDirectionButton>(joystick, hat, direction);
         }
 
@@ -749,14 +774,17 @@ public:
                 trigger_if_greater = true;
                 LOG_ERROR(Input, "Unknown direction {}", direction_name);
             }
-            // This is necessary so accessing GetAxis with axis won't crash
-            joystick->SetAxis(axis, 0);
+            // This is necessary so accessing GetAxis with axis won't crash. Must not disturb an
+            // already-tracked axis's real position (see EnsureAxis()'s doc comment).
+            joystick->EnsureAxis(axis);
             return std::make_unique<SDLAxisButton>(joystick, axis, threshold, trigger_if_greater);
         }
 
         const int button = params.Get("button", 0);
-        // This is necessary so accessing GetButton with button won't crash
-        joystick->SetButton(button, false);
+        // This is necessary so accessing GetButton with button won't crash. Must not disturb an
+        // already-tracked button's real state (see EnsureButton()'s doc comment) -- recreating
+        // this device (e.g. on every savestate load) must not make a held button read as released.
+        joystick->EnsureButton(button);
         return std::make_unique<SDLButton>(joystick, button);
     }
 
@@ -785,9 +813,12 @@ public:
 
         auto joystick = state.GetSDLJoystickByGUID(guid, port);
 
-        // This is necessary so accessing GetAxis with axis_x and axis_y won't crash
-        joystick->SetAxis(axis_x, 0);
-        joystick->SetAxis(axis_y, 0);
+        // This is necessary so accessing GetAxis with axis_x and axis_y won't crash. Must not
+        // disturb the stick's already-tracked real position (see EnsureAxis()'s doc comment) --
+        // this is the circle pad's own device factory, so this is exactly what was zeroing a
+        // physically-held-off-center circle pad back to centered on every savestate load.
+        joystick->EnsureAxis(axis_x);
+        joystick->EnsureAxis(axis_y);
         return std::make_unique<SDLAnalog>(joystick, axis_x, axis_y, deadzone);
     }
 

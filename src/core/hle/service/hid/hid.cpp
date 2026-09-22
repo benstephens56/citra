@@ -44,7 +44,16 @@ void Module::serialize(Archive& ar, const unsigned int file_version) {
     ar& next_gyroscope_index;
     ar& enable_accelerometer_count;
     ar& enable_gyroscope_count;
-    if (Archive::is_loading::value) {
+    if (Archive::is_loading::value && (!buttons[0] || !circle_pad)) {
+        // Only (re)create the input devices if they haven't been loaded yet at all (e.g. this is
+        // the very first LoadState of a session, before UpdatePadCallback's own lazy reload has
+        // had a chance to run). Recreating them on every single load, as this used to do
+        // unconditionally, is needless churn for a workflow that can load states many times a
+        // second (TAS work), and depends on every device backend's factory never clobbering
+        // already-tracked live state when re-initializing a device -- true after the SDL backend
+        // fix, but not guaranteed for every current or future input backend. A config change
+        // mid-session is already picked up via ReloadInputDevices()'s deferred
+        // is_device_reload_pending flag, so this doesn't need to also handle that case.
         LoadInputDevices();
     }
     ar& state.hex;
