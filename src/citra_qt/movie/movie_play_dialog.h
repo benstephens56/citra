@@ -24,6 +24,7 @@ public:
 
     QString GetMoviePath() const;
     QString GetGamePath() const;
+    bool GetDeleteSaveData() const;
 
 private:
     void OnToolButtonClicked();

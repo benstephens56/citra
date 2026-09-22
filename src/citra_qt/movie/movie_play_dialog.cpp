@@ -2,6 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QPushButton>
 #include <QTime>
@@ -27,6 +28,11 @@ MoviePlayDialog::MoviePlayDialog(QWidget* parent, GameList* game_list_, const Co
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &MoviePlayDialog::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &MoviePlayDialog::reject);
 
+    // Remember whether this was checked last time, for continuity between playback sessions.
+    ui->deleteSaveDataCheckBox->setChecked(UISettings::values.movie_play_delete_save_data.GetValue());
+    connect(ui->deleteSaveDataCheckBox, &QCheckBox::toggled, this,
+            [](bool checked) { UISettings::values.movie_play_delete_save_data = checked; });
+
     if (system.IsPoweredOn()) {
         QString note_text;
         note_text = tr("Current running game will be stopped.");
@@ -46,6 +52,10 @@ QString MoviePlayDialog::GetMoviePath() const {
 QString MoviePlayDialog::GetGamePath() const {
     const auto metadata = system.Movie().GetMovieMetadata(GetMoviePath().toStdString());
     return game_list->FindGameByProgramID(metadata.program_id, GameListItemPath::FullPathRole);
+}
+
+bool MoviePlayDialog::GetDeleteSaveData() const {
+    return ui->deleteSaveDataCheckBox->isChecked();
 }
 
 void MoviePlayDialog::OnToolButtonClicked() {

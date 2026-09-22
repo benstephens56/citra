@@ -78,6 +78,7 @@ struct Values {
 
     Settings::Setting<bool> confirm_before_closing{true, "confirmClose"};
     Settings::Setting<bool> save_state_warning{true, "saveStateWarning"};
+    Settings::Setting<bool> movie_play_delete_save_data{false, "moviePlayDeleteSaveData"};
     Settings::Setting<bool> first_start{true, "firstStart"};
     Settings::Setting<bool> pause_when_in_background{false, "pauseWhenInBackground"};
     Settings::Setting<bool> hide_mouse{false, "hideInactiveMouse"};

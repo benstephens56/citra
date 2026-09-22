@@ -303,6 +303,10 @@ private:
     QLabel* emu_frametime_label = nullptr;
     QPushButton* graphics_api_button = nullptr;
     QTimer status_bar_update_timer;
+    // The perf-stats-derived labels (speed/FPS/frametime) need a longer averaging window than
+    // the frame counter to avoid jitter, so they're only refreshed once every N timer ticks.
+    static constexpr int PerfStatsUpdateTickInterval = 10;
+    int status_bar_update_ticks = 0;
     bool message_label_used_for_movie = false;
 
     MultiplayerState* multiplayer_state = nullptr;

@@ -54,10 +54,10 @@ const std::array<std::array<int, 5>, Settings::NativeAnalog::NumAnalogs> Config:
 // This must be in alphabetical order according to action name as it must have the same order as
 // UISetting::values.shortcuts, which is alphabetically ordered.
 // clang-format off
-const std::array<UISettings::Shortcut, 28> Config::default_hotkeys {{
+const std::array<UISettings::Shortcut, 48> Config::default_hotkeys {{
      {QStringLiteral("Advance Frame"),            QStringLiteral("Main Window"), {QStringLiteral(""),     Qt::ApplicationShortcut}},
      {QStringLiteral("Capture Screenshot"),       QStringLiteral("Main Window"), {QStringLiteral("Ctrl+P"), Qt::WidgetWithChildrenShortcut}},
-     {QStringLiteral("Continue/Pause Emulation"), QStringLiteral("Main Window"), {QStringLiteral("F4"),     Qt::WindowShortcut}},
+     {QStringLiteral("Continue/Pause Emulation"), QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}},
      {QStringLiteral("Decrease 3D Factor"),       QStringLiteral("Main Window"), {QStringLiteral("Ctrl+-"), Qt::ApplicationShortcut}},
      {QStringLiteral("Decrease Speed Limit"),     QStringLiteral("Main Window"), {QStringLiteral("-"),      Qt::ApplicationShortcut}},
      {QStringLiteral("Exit Citra"),               QStringLiteral("Main Window"), {QStringLiteral("Ctrl+Q"), Qt::WindowShortcut}},
@@ -65,22 +65,42 @@ const std::array<UISettings::Shortcut, 28> Config::default_hotkeys {{
      {QStringLiteral("Fullscreen"),               QStringLiteral("Main Window"), {QStringLiteral("F11"),    Qt::WindowShortcut}},
      {QStringLiteral("Increase 3D Factor"),       QStringLiteral("Main Window"), {QStringLiteral("Ctrl++"), Qt::ApplicationShortcut}},
      {QStringLiteral("Increase Speed Limit"),     QStringLiteral("Main Window"), {QStringLiteral("+"),      Qt::ApplicationShortcut}},
-     {QStringLiteral("Load Amiibo"),              QStringLiteral("Main Window"), {QStringLiteral("F2"),     Qt::WidgetWithChildrenShortcut}},
+     {QStringLiteral("Load Amiibo"),              QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WidgetWithChildrenShortcut}},
      {QStringLiteral("Load File"),                QStringLiteral("Main Window"), {QStringLiteral("Ctrl+O"), Qt::WidgetWithChildrenShortcut}},
      {QStringLiteral("Load from Newest Slot"),    QStringLiteral("Main Window"), {QStringLiteral("Ctrl+V"), Qt::WindowShortcut}},
+     {QStringLiteral("Load State Slot 1"),        QStringLiteral("Main Window"), {QStringLiteral("1"),      Qt::WindowShortcut}},
+     {QStringLiteral("Load State Slot 2"),        QStringLiteral("Main Window"), {QStringLiteral("2"),      Qt::WindowShortcut}},
+     {QStringLiteral("Load State Slot 3"),        QStringLiteral("Main Window"), {QStringLiteral("3"),      Qt::WindowShortcut}},
+     {QStringLiteral("Load State Slot 4"),        QStringLiteral("Main Window"), {QStringLiteral("4"),      Qt::WindowShortcut}},
+     {QStringLiteral("Load State Slot 5"),        QStringLiteral("Main Window"), {QStringLiteral("5"),      Qt::WindowShortcut}},
+     {QStringLiteral("Load State Slot 6"),        QStringLiteral("Main Window"), {QStringLiteral("6"),      Qt::WindowShortcut}},
+     {QStringLiteral("Load State Slot 7"),        QStringLiteral("Main Window"), {QStringLiteral("7"),      Qt::WindowShortcut}},
+     {QStringLiteral("Load State Slot 8"),        QStringLiteral("Main Window"), {QStringLiteral("8"),      Qt::WindowShortcut}},
+     {QStringLiteral("Load State Slot 9"),        QStringLiteral("Main Window"), {QStringLiteral("9"),      Qt::WindowShortcut}},
+     {QStringLiteral("Load State Slot 10"),       QStringLiteral("Main Window"), {QStringLiteral("0"),      Qt::WindowShortcut}},
      {QStringLiteral("Mute Audio"),               QStringLiteral("Main Window"), {QStringLiteral("Ctrl+M"), Qt::WindowShortcut}},
-     {QStringLiteral("Remove Amiibo"),            QStringLiteral("Main Window"), {QStringLiteral("F3"),     Qt::ApplicationShortcut}},
-     {QStringLiteral("Restart Emulation"),        QStringLiteral("Main Window"), {QStringLiteral("F6"),     Qt::WindowShortcut}},
-     {QStringLiteral("Rotate Screens Upright"),   QStringLiteral("Main Window"), {QStringLiteral("F8"),     Qt::WindowShortcut}},
+     {QStringLiteral("Remove Amiibo"),            QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::ApplicationShortcut}},
+     {QStringLiteral("Restart Emulation"),        QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}},
+     {QStringLiteral("Rotate Screens Upright"),   QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}},
+     {QStringLiteral("Save State Slot 1"),        QStringLiteral("Main Window"), {QStringLiteral("F1"),     Qt::WindowShortcut}},
+     {QStringLiteral("Save State Slot 2"),        QStringLiteral("Main Window"), {QStringLiteral("F2"),     Qt::WindowShortcut}},
+     {QStringLiteral("Save State Slot 3"),        QStringLiteral("Main Window"), {QStringLiteral("F3"),     Qt::WindowShortcut}},
+     {QStringLiteral("Save State Slot 4"),        QStringLiteral("Main Window"), {QStringLiteral("F4"),     Qt::WindowShortcut}},
+     {QStringLiteral("Save State Slot 5"),        QStringLiteral("Main Window"), {QStringLiteral("F5"),     Qt::WindowShortcut}},
+     {QStringLiteral("Save State Slot 6"),        QStringLiteral("Main Window"), {QStringLiteral("F6"),     Qt::WindowShortcut}},
+     {QStringLiteral("Save State Slot 7"),        QStringLiteral("Main Window"), {QStringLiteral("F7"),     Qt::WindowShortcut}},
+     {QStringLiteral("Save State Slot 8"),        QStringLiteral("Main Window"), {QStringLiteral("F8"),     Qt::WindowShortcut}},
+     {QStringLiteral("Save State Slot 9"),        QStringLiteral("Main Window"), {QStringLiteral("F9"),     Qt::WindowShortcut}},
+     {QStringLiteral("Save State Slot 10"),       QStringLiteral("Main Window"), {QStringLiteral("F10"),    Qt::WindowShortcut}},
      {QStringLiteral("Save to Oldest Slot"),      QStringLiteral("Main Window"), {QStringLiteral("Ctrl+C"), Qt::WindowShortcut}},
-     {QStringLiteral("Stop Emulation"),           QStringLiteral("Main Window"), {QStringLiteral("F5"),     Qt::WindowShortcut}},
-     {QStringLiteral("Swap Screens"),             QStringLiteral("Main Window"), {QStringLiteral("F9"),     Qt::WindowShortcut}},
+     {QStringLiteral("Stop Emulation"),           QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}},
+     {QStringLiteral("Swap Screens"),             QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}},
      {QStringLiteral("Toggle 3D"),                QStringLiteral("Main Window"), {QStringLiteral("Ctrl+3"), Qt::ApplicationShortcut}},
-     {QStringLiteral("Toggle Custom Textures"),   QStringLiteral("Main Window"), {QStringLiteral("F7"),     Qt::ApplicationShortcut}},
+     {QStringLiteral("Toggle Custom Textures"),   QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::ApplicationShortcut}},
      {QStringLiteral("Toggle Filter Bar"),        QStringLiteral("Main Window"), {QStringLiteral("Ctrl+F"), Qt::WindowShortcut}},
      {QStringLiteral("Toggle Frame Advancing"),   QStringLiteral("Main Window"), {QStringLiteral("Ctrl+A"), Qt::ApplicationShortcut}},
      {QStringLiteral("Toggle Per-Game Speed"),    QStringLiteral("Main Window"), {QStringLiteral("Ctrl+Z"), Qt::ApplicationShortcut}},
-     {QStringLiteral("Toggle Screen Layout"),     QStringLiteral("Main Window"), {QStringLiteral("F10"),    Qt::WindowShortcut}},
+     {QStringLiteral("Toggle Screen Layout"),     QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}},
      {QStringLiteral("Toggle Status Bar"),        QStringLiteral("Main Window"), {QStringLiteral("Ctrl+S"), Qt::WindowShortcut}},
      {QStringLiteral("Toggle Texture Dumping"),   QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::ApplicationShortcut}},
     }};
@@ -758,6 +778,7 @@ void Config::ReadUIValues() {
         ReadBasicSetting(UISettings::values.show_status_bar);
         ReadBasicSetting(UISettings::values.confirm_before_closing);
         ReadBasicSetting(UISettings::values.save_state_warning);
+        ReadBasicSetting(UISettings::values.movie_play_delete_save_data);
         ReadBasicSetting(UISettings::values.first_start);
         ReadBasicSetting(UISettings::values.callout_flags);
         ReadBasicSetting(UISettings::values.show_console);
@@ -1225,6 +1246,7 @@ void Config::SaveUIValues() {
         WriteBasicSetting(UISettings::values.show_status_bar);
         WriteBasicSetting(UISettings::values.confirm_before_closing);
         WriteBasicSetting(UISettings::values.save_state_warning);
+        WriteBasicSetting(UISettings::values.movie_play_delete_save_data);
         WriteBasicSetting(UISettings::values.first_start);
         WriteBasicSetting(UISettings::values.callout_flags);
         WriteBasicSetting(UISettings::values.show_console);

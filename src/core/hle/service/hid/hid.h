@@ -367,4 +367,4 @@ void InstallInterfaces(Core::System& system);
 
 SERVICE_CONSTRUCT(Service::HID::Module)
 BOOST_CLASS_EXPORT_KEY(Service::HID::Module)
-BOOST_CLASS_VERSION(Service::HID::Module, 1)
+BOOST_CLASS_VERSION(Service::HID::Module, 2)

@@ -269,7 +269,7 @@ if (APPLE)
     find_library(IOSURFACE_LIBRARY IOSurface REQUIRED)
     set(PLATFORM_LIBRARIES ${COCOA_LIBRARY} ${AVFOUNDATION_LIBRARY} ${IOSURFACE_LIBRARY} ${MOLTENVK_LIBRARY})
 elseif (WIN32)
-    set(PLATFORM_LIBRARIES winmm ws2_32)
+    set(PLATFORM_LIBRARIES winmm ws2_32 mswsock)
     if (MINGW)
         # PSAPI is the Process Status API
         set(PLATFORM_LIBRARIES ${PLATFORM_LIBRARIES} psapi imm32 version)

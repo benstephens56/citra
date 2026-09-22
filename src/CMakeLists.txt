@@ -126,6 +126,11 @@ else()
 
     if (MINGW)
         add_definitions(-DMINGW_HAS_SECURE_API)
+        # Unlike the MSVC branch above, these weren't defined here, so windows.h's min/max
+        # macros would leak into TUs that need them undefined (e.g. vulkan.hpp, which relies on
+        # std::numeric_limits<T>::max() parsing as a function call), breaking the build
+        # depending on include order.
+        add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
         if (COMPILE_WITH_DWARF)
             add_compile_options("-gdwarf")
         endif()

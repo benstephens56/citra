@@ -23,6 +23,13 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+// SIO_GET_INTERFACE_LIST/INTERFACE_INFO (used by GetDefaultInterfaceInfo) and WSAIoctl's vendor
+// IOCTLs are declared in mswsock.h, not winsock2.h/ws2tcpip.h; omitting it fails to build with
+// "SIO_GET_INTERFACE_LIST"/"INTERFACE_INFO": undeclared identifier.
+#include <mswsock.h>
+#ifdef _MSC_VER
+#pragma comment(lib, "Mswsock.lib")
+#endif
 
 // MinGW does not define several errno constants
 #ifndef _MSC_VER

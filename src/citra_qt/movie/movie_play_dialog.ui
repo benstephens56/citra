@@ -125,6 +125,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="deleteSaveDataCheckBox">
+     <property name="text">
+      <string>Delete save data before playback</string>
+     </property>
+     <property name="toolTip">
+      <string>Deletes the target game's save data before starting movie playback, for a clean/deterministic start. This setting is remembered for next time.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>

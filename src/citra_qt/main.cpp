@@ -596,6 +596,15 @@ void GMainWindow::InitializeHotkeys() {
     link_action_shortcut(ui->action_Load_from_Newest_Slot, QStringLiteral("Load from Newest Slot"));
     link_action_shortcut(ui->action_Save_to_Oldest_Slot, QStringLiteral("Save to Oldest Slot"));
 
+    for (u32 i = 0; i < Core::SaveStateSlotCount; ++i) {
+        link_action_shortcut(actions_save_state[i],
+                             QStringLiteral("Save State Slot %1").arg(i + 1));
+        link_action_shortcut(actions_load_state[i],
+                             QStringLiteral("Load State Slot %1").arg(i + 1));
+    }
+    // Unlike other hotkeys, holding the Advance Frame hotkey should advance frames repeatedly.
+    ui->action_Advance_Frame->setAutoRepeat(true);
+
     const auto add_secondary_window_hotkey = [this](QKeySequence hotkey, const char* slot) {
         // This action will fire specifically when secondary_window is in focus
         QAction* secondary_window_action = new QAction(secondary_window);
@@ -857,15 +866,18 @@ void GMainWindow::ConnectMenuEvents() {
     connect_menu(ui->action_Enable_Frame_Advancing, [this] {
         if (emulation_running) {
             system.frame_limiter.SetFrameAdvancing(ui->action_Enable_Frame_Advancing->isChecked());
-            ui->action_Advance_Frame->setEnabled(ui->action_Enable_Frame_Advancing->isChecked());
         }
     });
     connect_menu(ui->action_Advance_Frame, [this] {
-        if (emulation_running && system.frame_limiter.IsFrameAdvancing()) {
-            ui->action_Enable_Frame_Advancing->setChecked(true);
-            ui->action_Advance_Frame->setEnabled(true);
-            system.frame_limiter.AdvanceFrame();
+        if (!emulation_running) {
+            return;
         }
+        // Pressing the Advance Frame hotkey also enables frame advancing if it wasn't already on.
+        if (!system.frame_limiter.IsFrameAdvancing()) {
+            system.frame_limiter.SetFrameAdvancing(true);
+            ui->action_Enable_Frame_Advancing->setChecked(true);
+        }
+        system.frame_limiter.AdvanceFrame();
     });
     connect_menu(ui->action_Capture_Screenshot, &GMainWindow::OnCaptureScreenshot);
     connect_menu(ui->action_Dump_Video, &GMainWindow::OnDumpVideo);
@@ -1220,10 +1232,7 @@ void GMainWindow::BootGame(const QString& filename) {
     }
 
     if (ui->action_Enable_Frame_Advancing->isChecked()) {
-        ui->action_Advance_Frame->setEnabled(true);
         system.frame_limiter.SetFrameAdvancing(true);
-    } else {
-        ui->action_Advance_Frame->setEnabled(false);
     }
 
     if (video_dumping_on_start) {
@@ -1264,7 +1273,9 @@ void GMainWindow::BootGame(const QString& filename) {
         game_list->hide();
         game_list_placeholder->hide();
     }
-    status_bar_update_timer.start(1000);
+    // Update at 100 Hz so the frame counter and other TAS-relevant stats feel responsive.
+    status_bar_update_ticks = 0;
+    status_bar_update_timer.start(10);
 
     if (UISettings::values.hide_mouse) {
         mouse_hide_timer.start();
@@ -2216,6 +2227,16 @@ void GMainWindow::OnPlayMovie() {
         return;
     }
 
+    if (dialog.GetDeleteSaveData()) {
+        const auto metadata = movie.GetMovieMetadata(dialog.GetMoviePath().toStdString());
+        const std::string sdmc_dir = FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir);
+        const std::string save_data_path = FileSys::ArchiveSource_SDSaveData::GetSaveDataPathFor(
+            sdmc_dir, metadata.program_id);
+        if (FileUtil::Exists(save_data_path) && !FileUtil::DeleteDirRecursively(save_data_path)) {
+            LOG_ERROR(Frontend, "Failed to delete save data at {}", save_data_path);
+        }
+    }
+
     movie_playback_on_start = true;
     movie_playback_path = dialog.GetMoviePath();
     BootGame(dialog.GetGamePath());
@@ -2477,6 +2498,14 @@ void GMainWindow::UpdateStatusBar() {
         message_label->setText(QString{});
         message_label_used_for_movie = false;
         ui->action_Save_Movie->setEnabled(false);
+    }
+
+    // The movie/frame counter above is updated every tick for smoothness, but the perf-stats
+    // derived labels below need a wider averaging window or they become jittery, so only
+    // refresh them periodically.
+    status_bar_update_ticks = (status_bar_update_ticks + 1) % PerfStatsUpdateTickInterval;
+    if (status_bar_update_ticks != 0) {
+        return;
     }
 
     auto results = system.GetAndResetPerfStats();

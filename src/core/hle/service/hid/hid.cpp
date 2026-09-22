@@ -8,6 +8,7 @@
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/unique_ptr.hpp>
+#include <boost/serialization/vector.hpp>
 #include "common/archives.h"
 #include "common/logging/log.h"
 #include "core/3ds.h"
@@ -47,6 +48,11 @@ void Module::serialize(Archive& ar, const unsigned int file_version) {
         LoadInputDevices();
     }
     ar& state.hex;
+    // The circle pad averaging filter's history must be preserved across savestates, otherwise
+    // it desyncs from the just-restored pad state and produces a few frames of incorrect circle
+    // pad position after loading, even while the physical stick is held steady.
+    ar& circle_pad_old_x;
+    ar& circle_pad_old_y;
     // Update events are set in the constructor
     // Devices are set from the implementation (and are stateless afaik)
 }

@@ -128,6 +128,11 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
             status_details = e.what();
             return ResultStatus::ErrorSavestate;
         }
+        // Immediately present the framebuffer contents restored by the savestate. Otherwise the
+        // previous frame stays on screen until emulation advances another frame on its own.
+        if (VideoCore::g_renderer) {
+            VideoCore::g_renderer->SwapBuffers();
+        }
         frame_limiter.WaitOnce();
         return ResultStatus::Success;
     }
