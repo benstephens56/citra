@@ -27,7 +27,11 @@ static const std::unordered_map<AVOptionType, const char*> TypeNameMap{{
     {AV_OPT_TYPE_STRING, QT_TR_NOOP("string")},
     {AV_OPT_TYPE_DICT, QT_TR_NOOP("dictionary")},
     {AV_OPT_TYPE_VIDEO_RATE, QT_TR_NOOP("video rate")},
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100) // lavc 59.24.100
+    {AV_OPT_TYPE_CHLAYOUT, QT_TR_NOOP("channel layout")},
+#else
     {AV_OPT_TYPE_CHANNEL_LAYOUT, QT_TR_NOOP("channel layout")},
+#endif
 }};
 
 static const std::unordered_map<AVOptionType, const char*> TypeDescriptionMap{{
@@ -39,7 +43,11 @@ static const std::unordered_map<AVOptionType, const char*> TypeDescriptionMap{{
     {AV_OPT_TYPE_DICT,
      QT_TR_NOOP("Comma-splitted list of &lt;key>=&lt;value>. Do not put spaces.")},
     {AV_OPT_TYPE_VIDEO_RATE, QT_TR_NOOP("&lt;num>/&lt;den>, or preset values like 'pal'.")},
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100) // lavc 59.24.100
+    {AV_OPT_TYPE_CHLAYOUT, QT_TR_NOOP("Hexadecimal channel layout mask starting with '0x'.")},
+#else
     {AV_OPT_TYPE_CHANNEL_LAYOUT, QT_TR_NOOP("Hexadecimal channel layout mask starting with '0x'.")},
+#endif
 }};
 
 /// Get the preset values of an option. returns {display value, real value}
