@@ -18,7 +18,7 @@ jobs:
       - name: Pack
         run: ./.ci/source.sh
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: source
           path: artifacts/
@@ -53,7 +53,7 @@ jobs:
         run: ./.ci/pack.sh
         if: ${{ matrix.target == 'appimage' }}
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ matrix.target == 'appimage' }}
         with:
           name: ${{ env.OS }}-${{ env.TARGET }}
@@ -118,7 +118,7 @@ jobs:
       - name: Pack
         run: ./.ci/pack.sh
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.OS }}-${{ env.TARGET }}
           path: artifacts/
@@ -179,7 +179,7 @@ jobs:
       - name: Pack
         run: ./.ci/pack.sh
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.OS }}-${{ env.TARGET }}
           path: artifacts/
@@ -229,7 +229,7 @@ jobs:
           PACK_INDIVIDUALLY: 1
           SKIP_7Z: 1
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.OS }}-${{ env.TARGET }}
           path: src/android/app/artifacts/
