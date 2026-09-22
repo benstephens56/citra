@@ -18,6 +18,23 @@
 
 using namespace DynamicLibrary;
 
+// AVCodec::pix_fmts was deprecated in newer FFmpeg (favoring avcodec_get_supported_config()), but
+// is still present and functional -- only the deprecation warning itself needs silencing, since
+// this project's Windows build treats warnings as errors. Scoped tightly around each access below
+// rather than applied file-wide, so an unrelated future deprecation warning here still surfaces.
+#if defined(_MSC_VER)
+#define FFMPEG_IGNORE_DEPRECATED_BEGIN __pragma(warning(push)) __pragma(warning(disable : 4996))
+#define FFMPEG_IGNORE_DEPRECATED_END __pragma(warning(pop))
+#elif defined(__GNUC__) || defined(__clang__)
+#define FFMPEG_IGNORE_DEPRECATED_BEGIN                                                           \
+    _Pragma("GCC diagnostic push")                                                               \
+        _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#define FFMPEG_IGNORE_DEPRECATED_END _Pragma("GCC diagnostic pop")
+#else
+#define FFMPEG_IGNORE_DEPRECATED_BEGIN
+#define FFMPEG_IGNORE_DEPRECATED_END
+#endif
+
 namespace VideoDumper {
 
 void InitializeFFmpegLibraries() {
@@ -173,10 +190,13 @@ bool FFmpegVideoStream::Init(FFmpegMuxer& muxer, const Layout::FramebufferLayout
     // Get pixel format for codec
     auto options = ToAVDictionary(Settings::values.video_encoder_options);
     auto pixel_format_opt = FFmpeg::av_dict_get(options, "pixel_format", nullptr, 0);
+    FFMPEG_IGNORE_DEPRECATED_BEGIN
+    const AVPixelFormat* const codec_pix_fmts = codec->pix_fmts;
+    FFMPEG_IGNORE_DEPRECATED_END
     if (pixel_format_opt) {
         sw_pixel_format = FFmpeg::av_get_pix_fmt(pixel_format_opt->value);
-    } else if (codec->pix_fmts) {
-        sw_pixel_format = GetPixelFormat(codec_context.get(), codec->pix_fmts);
+    } else if (codec_pix_fmts) {
+        sw_pixel_format = GetPixelFormat(codec_context.get(), codec_pix_fmts);
     } else {
         sw_pixel_format = AV_PIX_FMT_YUV420P;
     }
@@ -285,11 +305,14 @@ void FFmpegVideoStream::ProcessFrame(VideoFrame& frame) {
 }
 
 bool FFmpegVideoStream::InitHWContext(const AVCodec* codec) {
-    for (std::size_t i = 0; codec->pix_fmts[i] != AV_PIX_FMT_NONE; ++i) {
+    FFMPEG_IGNORE_DEPRECATED_BEGIN
+    const AVPixelFormat* const codec_pix_fmts = codec->pix_fmts;
+    FFMPEG_IGNORE_DEPRECATED_END
+    for (std::size_t i = 0; codec_pix_fmts[i] != AV_PIX_FMT_NONE; ++i) {
         const AVCodecHWConfig* config;
         for (int j = 0;; ++j) {
             config = FFmpeg::avcodec_get_hw_config(codec, j);
-            if (!config || config->pix_fmt == codec->pix_fmts[i]) {
+            if (!config || config->pix_fmt == codec_pix_fmts[i]) {
                 break;
             }
         }
@@ -303,7 +326,7 @@ bool FFmpegVideoStream::InitHWContext(const AVCodec* codec) {
             continue;
         }
 
-        codec_context->pix_fmt = codec->pix_fmts[i];
+        codec_context->pix_fmt = codec_pix_fmts[i];
 
         // Create HW device context
         AVBufferRef* hw_device_context;
@@ -351,7 +374,7 @@ bool FFmpegVideoStream::InitHWContext(const AVCodec* codec) {
 
         AVHWFramesContext* hw_frames_context =
             reinterpret_cast<AVHWFramesContext*>(hw_frames_context_ref->data);
-        hw_frames_context->format = codec->pix_fmts[i];
+        hw_frames_context->format = codec_pix_fmts[i];
         hw_frames_context->sw_format = sw_pixel_format;
         hw_frames_context->width = codec_context->width;
         hw_frames_context->height = codec_context->height;
@@ -956,7 +979,11 @@ std::string FormatDefaultValue(const AVOption* option,
     case AV_OPT_TYPE_VIDEO_RATE: {
         return ToStdString(option->default_val.str);
     }
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100) // lavc 59.24.100
+    case AV_OPT_TYPE_CHLAYOUT: {
+#else
     case AV_OPT_TYPE_CHANNEL_LAYOUT: {
+#endif
         return fmt::format("{:#x}", option->default_val.i64);
     }
     default:
