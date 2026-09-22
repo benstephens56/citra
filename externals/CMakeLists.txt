@@ -61,6 +61,24 @@ else()
     set(CRYPTOPP_BUILD_TESTING OFF CACHE BOOL "")
     set(CRYPTOPP_INSTALL OFF CACHE BOOL "")
     set(CRYPTOPP_SOURCES "${CMAKE_SOURCE_DIR}/externals/cryptopp" CACHE STRING "")
+    # cryptopp-cmake's "cryptopp" target lives at externals/cryptopp-cmake/cryptopp, and its
+    # sources.cmake references CRYPTOPP_SOURCES (externals/cryptopp, two directories up) as an
+    # external absolute path rather than a subdirectory. With a multi-config generator (e.g. the
+    # Visual Studio generator, which many people configure by opening this project directly in
+    # Visual Studio) MSBuild mangles that ".."-crossing relative path into a
+    # "<target>.dir/<Config>/__/__/cryptopp" intermediate object directory, but doesn't reliably
+    # create it before invoking the compiler, so a clean build fails with something like
+    # "C1083: Cannot open compiler generated file: '...\__\__\cryptopp\<file>.obj'". Pre-create it
+    # for every configured build type so the compiler always has somewhere to write.
+    if (CMAKE_CONFIGURATION_TYPES)
+        foreach (config ${CMAKE_CONFIGURATION_TYPES})
+            file(MAKE_DIRECTORY
+                "${CMAKE_CURRENT_BINARY_DIR}/cryptopp-cmake/cryptopp/cryptopp.dir/${config}/__/__/cryptopp")
+        endforeach()
+    else()
+        file(MAKE_DIRECTORY
+            "${CMAKE_CURRENT_BINARY_DIR}/cryptopp-cmake/cryptopp/CMakeFiles/cryptopp.dir/__/__/cryptopp")
+    endif()
     add_subdirectory(cryptopp-cmake)
 endif()
 
