@@ -135,7 +135,15 @@ void File::Read(Kernel::HLERequestContext& ctx) {
             }
 
             const auto read_delay = static_cast<s64>(backend->GetReadDelayNs(async_data->length));
-            if (!async_data->cache_ready) {
+            // The cache-miss path normally shortens the delay by how long the real host I/O
+            // took (steady_clock), so the game sees a realistic total latency. That measured
+            // duration depends on host disk/OS cache state and is not reproducible between
+            // runs, which shifts the emulated tick at which this async read appears to
+            // complete -- exactly the kind of timing a movie's recorded input stream can't
+            // tolerate diverging on. Skip the measurement while a movie is recording or
+            // playing back and use the same fixed, length-derived delay as a cache hit.
+            if (!async_data->cache_ready && Core::System::GetInstance().Movie().GetPlayMode() ==
+                                                Core::Movie::PlayMode::None) {
                 const auto time_took = std::chrono::duration_cast<std::chrono::nanoseconds>(
                                            std::chrono::steady_clock::now() - async_data->pre_timer)
                                            .count();
