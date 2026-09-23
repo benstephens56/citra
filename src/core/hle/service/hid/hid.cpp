@@ -294,7 +294,14 @@ void Module::UpdateGyroscopeCallback(std::uintptr_t user_data, s64 cycles_late) 
 
     Common::Vec3<float> gyro;
     std::tie(std::ignore, gyro) = motion_device->GetStatus();
-    double stretch = system.perf_stats->GetLastFrameTimeScale();
+    // GetLastFrameTimeScale() is derived from real (wall-clock) frame durations, so it is not
+    // reproducible between runs -- using it here makes the recorded/replayed gyroscope reading
+    // (and therefore any game logic that branches on it) non-deterministic. Movies must never
+    // observe it: skip the stretch (use a neutral 1.0 factor) whenever a movie is recording or
+    // playing back, and keep the original wall-time-based correction for regular interactive play.
+    const double stretch = system.Movie().GetPlayMode() == Core::Movie::PlayMode::None
+                               ? system.perf_stats->GetLastFrameTimeScale()
+                               : 1.0;
     gyro *= gyroscope_coef * static_cast<float>(stretch);
     gyroscope_entry.x = static_cast<s16>(gyro.x);
     gyroscope_entry.y = static_cast<s16>(gyro.y);
